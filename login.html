@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FraudShield — Login</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bg); }
+    .login-box { width:100%; max-width:400px; padding:40px; background:var(--surface); border:1px solid var(--border); border-radius:16px; }
+    .login-logo { text-align:center; margin-bottom:32px; }
+    .login-logo .logo-icon { font-size:36px; color:var(--accent); }
+    .login-logo h1 { font-size:22px; font-weight:800; margin-top:8px; }
+    .login-logo p  { font-size:12px; color:var(--text-sub); margin-top:4px; }
+    .login-error { background:rgba(240,82,82,0.12); border:1px solid var(--danger); color:var(--danger); padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:16px; display:none; }
+    .login-tabs { display:flex; gap:8px; margin-bottom:24px; }
+    .login-tab { flex:1; padding:8px; text-align:center; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; border:1px solid var(--border); background:transparent; color:var(--text-sub); transition:.2s; }
+    .login-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    .demo-hint { margin-top:20px; padding:12px; background:var(--surface2); border-radius:8px; font-size:11px; color:var(--text-sub); font-family:var(--font-mono); text-align:center; }
+  </style>
+</head>
+<body>
+<div class="login-box">
+  <div class="login-logo">
+    <div class="logo-icon">⬡</div>
+    <h1>FraudShield</h1>
+    <p>Real-Time Fraud Intelligence Platform</p>
+  </div>
+
+  <div class="login-tabs">
+    <button class="login-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
+    <button class="login-tab" id="tab-register" onclick="switchTab('register')">Register</button>
+  </div>
+
+  <div class="login-error" id="loginError"></div>
+
+  <form id="authForm" onsubmit="handleAuth(event)">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="auth-username" placeholder="Enter username" required autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="auth-password" placeholder="Enter password" required autocomplete="current-password"/>
+    </div>
+    <button class="btn-primary" type="submit" id="authBtn" style="width:100%;margin-top:8px">Login</button>
+  </form>
+
+  <div class="demo-hint">
+    Demo credentials — admin / admin123
+  </div>
+</div>
+
+<script>
+  let currentTab = 'login';
+
+  function switchTab(tab) {
+    currentTab = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('authBtn').textContent = tab === 'login' ? 'Login' : 'Register';
+    document.getElementById('loginError').style.display = 'none';
+  }
+
+  async function handleAuth(e) {
+    e.preventDefault();
+    const username = document.getElementById('auth-username').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const btn      = document.getElementById('authBtn');
+    const errEl    = document.getElementById('loginError');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Please wait...';
+    errEl.style.display = 'none';
+
+    const endpoint = currentTab === 'login' ? '/api/auth/login' : '/api/auth/register';
+
+    try {
+      const res  = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Failed');
+
+      if (currentTab === 'register') {
+        errEl.style.cssText = 'display:block;background:rgba(34,211,160,0.1);border-color:var(--safe);color:var(--safe)';
+        errEl.textContent = '✓ Account created! You can now login.';
+        switchTab('login');
+      } else {
+        localStorage.setItem('fs_token', data.token);
+        localStorage.setItem('fs_user',  JSON.stringify({ username: data.username, role: data.role }));
+        window.location.replace('/dashboard');
+      }
+    } catch (err) {
+      errEl.style.cssText = 'display:block';
+      errEl.textContent = '✕ ' + err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = currentTab === 'login' ? 'Login' : 'Register';
+    }
+  }
+
+  // Redirect if already logged in
+  if (localStorage.getItem('fs_token')) window.location.replace('/dashboard');
+</script>
+</body>
+</html>

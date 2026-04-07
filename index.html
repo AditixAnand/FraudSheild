@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FraudShield — Real-Time Fraud Intelligence</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <span class="logo-icon">⬡</span>
+    <span class="logo-text">FraudShield</span>
+  </div>
+  <nav class="nav">
+    <a href="javascript:void(0)" class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">◈</span> Dashboard
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="simulate">
+      <span class="nav-icon">◎</span> Simulate Transaction
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="history">
+      <span class="nav-icon">⊞</span> Transaction Log
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="heatmap">
+      <span class="nav-icon">◉</span> Risk Heatmap
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="network">
+      <span class="nav-icon">⌬</span> Network Graph
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="rules">
+      <span class="nav-icon">◧</span> Rule Engine
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-page="users">
+      <span class="nav-icon">◫</span> Users
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="status-dot"></div>
+    <span>Live Feed Active</span>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-badge">
+        <span class="pulse-dot"></span> LIVE
+      </div>
+      <button onclick="testAlert()" style="background:var(--danger);color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-right:8px">Test Alert</button>
+      <button onclick="diagnosticCheck()" style="background:var(--accent);color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-right:8px">Debug</button>
+      <div class="alert-bell" id="alertBell" title="Alerts" onclick="toggleAlertDropdown()">
+        🔔 <span class="bell-count" id="bellCount">0</span>
+        <div class="alert-dropdown" id="alertDropdown">
+          <div class="alert-dropdown-header">
+            <span>Recent Alerts</span>
+            <button onclick="clearAllAlerts(event)" class="clear-alerts-btn">Clear All</button>
+          </div>
+          <div class="alert-dropdown-body" id="alertDropdownBody">
+            <div class="no-alerts">No alerts yet</div>
+          </div>
+        </div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <span id="themeIcon">☀</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ALERT BANNER -->
+  <div class="alert-banner" id="alertBanner" style="display:none">
+    <span id="alertText">⚠ High-risk transaction detected!</span>
+    <button onclick="document.getElementById('alertBanner').style.display='none'">✕</button>
+  </div>
+
+  <!-- PAGES -->
+
+  <!-- DASHBOARD PAGE -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Threat Overview</h1>
+      <p class="page-sub">Real-time monitoring across all payment channels</p>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-danger">
+        <div class="kpi-label">Fraud Detected Today</div>
+        <div class="kpi-value" id="kpi-fraud">0</div>
+        <div class="kpi-trend">↑ vs yesterday</div>
+      </div>
+      <div class="kpi-card kpi-safe">
+        <div class="kpi-label">Transactions Cleared</div>
+        <div class="kpi-value" id="kpi-clear">0</div>
+        <div class="kpi-trend">↑ normal traffic</div>
+      </div>
+      <div class="kpi-card kpi-warn">
+        <div class="kpi-label">Under Review</div>
+        <div class="kpi-value" id="kpi-review">0</div>
+        <div class="kpi-trend">Pending decision</div>
+      </div>
+      <div class="kpi-card kpi-neutral">
+        <div class="kpi-label">Accuracy Score</div>
+        <div class="kpi-value" id="kpi-accuracy">98.4%</div>
+        <div class="kpi-trend">↑ ML model v3.1</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="charts-row">
+      <div class="chart-card wide">
+        <div class="chart-title">Transaction Volume — Last 24h</div>
+        <div class="chart-wrap"><canvas id="volumeChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Risk Distribution</div>
+        <div class="chart-wrap"><canvas id="riskDonut"></canvas></div>
+      </div>
+    </div>
+
+    <!-- LIVE FEED -->
+    <div class="section-title">Live Transaction Feed</div>
+    <div class="live-feed" id="liveFeed">
+      <div class="feed-header">
+        <span>Time</span><span>Amount</span><span>Channel</span><span>Location</span><span>Risk Score</span><span>Status</span>
+      </div>
+      <div id="feedRows"></div>
+    </div>
+  </div>
+
+  <!-- SIMULATE PAGE -->
+  <div class="page" id="page-simulate">
+    <div class="page-header">
+      <h1>Simulate a Transaction</h1>
+      <p class="page-sub">Run a custom transaction through the fraud detection engine</p>
+    </div>
+    <div class="sim-layout">
+      <div class="sim-form card">
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input type="number" id="sim-amount" placeholder="e.g. 15000" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Channel</label>
+          <select id="sim-channel">
+            <option>UPI</option>
+            <option>Net Banking</option>
+            <option>Credit Card</option>
+            <option>NEFT</option>
+            <option>IMPS</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Merchant Category</label>
+          <select id="sim-merchant">
+            <option>Retail</option>
+            <option>Gambling</option>
+            <option>Travel</option>
+            <option>Crypto Exchange</option>
+            <option>Electronics</option>
+            <option>Food & Dining</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Country</label>
+          <select id="sim-country">
+            <option>India</option>
+            <option>USA</option>
+            <option>Russia</option>
+            <option>Nigeria</option>
+            <option>China</option>
+            <option>UK</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Time of Day</label>
+          <select id="sim-time">
+            <option>Morning (6–12)</option>
+            <option>Afternoon (12–18)</option>
+            <option>Evening (18–22)</option>
+            <option>Night (22–6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Device Fingerprint</label>
+          <select id="sim-device">
+            <option>Known Device</option>
+            <option>New Device</option>
+            <option>VPN Detected</option>
+            <option>TOR Exit Node</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Transaction Velocity</label>
+          <select id="sim-velocity">
+            <option>Normal (1–3/day)</option>
+            <option>High (10+/day)</option>
+            <option>Burst (5 in 1 min)</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="runSim">▶ Run Analysis</button>
+      </div>
+
+      <div class="sim-result card" id="simResult">
+        <div class="result-placeholder">
+          <div class="placeholder-icon">◎</div>
+          <p>Configure transaction parameters and click Run Analysis</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="page-header">
+      <h1>Transaction Log</h1>
+      <p class="page-sub">Full audit trail with filtering and export</p>
+    </div>
+    <div class="history-controls card">
+      <input type="text" id="histSearch" placeholder="Search by ID, amount, location..." oninput="filterHistory()" />
+      <select id="histFilter" onchange="filterHistory()">
+        <option value="all">All Statuses</option>
+        <option value="fraud">Fraud</option>
+        <option value="clear">Cleared</option>
+        <option value="review">Review</option>
+      </select>
+      <button class="btn-secondary" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn-secondary" onclick="downloadPDF()">⬇ PDF Report</button>
+    </div>
+    <div class="table-wrap card">
+      <table class="data-table" id="histTable">
+        <thead>
+          <tr>
+            <th>Txn ID</th><th>Time</th><th>Amount</th><th>Channel</th>
+            <th>Merchant</th><th>Country</th><th>Risk Score</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HEATMAP PAGE -->
+  <div class="page" id="page-heatmap">
+    <div class="page-header">
+      <h1>Geographic Risk Heatmap</h1>
+      <p class="page-sub">Fraud concentration by region using live data</p>
+    </div>
+    <div class="card heatmap-card">
+      <div class="heatmap-legend">
+        <span class="leg-safe">■ Low Risk</span>
+        <span class="leg-warn">■ Medium</span>
+        <span class="leg-danger">■ High Risk</span>
+      </div>
+      <div class="heatmap-grid" id="heatmapGrid"></div>
+    </div>
+    <div class="geo-stats card">
+      <div class="geo-stat" id="geoStats"></div>
+    </div>
+  </div>
+
+  <!-- NETWORK GRAPH PAGE -->
+  <div class="page" id="page-network">
+    <div class="page-header">
+      <h1>Fraud Network Graph</h1>
+      <p class="page-sub">Visualize account linkages and suspicious clusters</p>
+    </div>
+    <div class="card network-card">
+      <canvas id="networkCanvas"></canvas>
+      <div class="network-legend">
+        <span>● Suspicious Account</span>
+        <span>● Clean Account</span>
+        <span>— Linked Transaction</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES PAGE -->
+  <div class="page" id="page-rules">
+    <div class="page-header">
+      <h1>Rule Engine</h1>
+      <p class="page-sub">Configure detection thresholds and custom fraud rules</p>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-card card" id="rule-velocity">
+        <div class="rule-top">
+          <span class="rule-name">Velocity Rule</span>
+          <label class="toggle">
+            <input type="checkbox" checked id="toggle-velocity">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Flag if &gt; <input type="number" value="5" class="inline-input" id="vel-threshold" min="1"> transactions within <input type="number" value="60" class="inline-input" id="vel-window" min="1"> seconds</p>
+        <div class="rule-status on">Active</div>
+      </div>
+      <div class="rule-card card" id="rule-amount">
+        <div class="rule-top">
+          <span class="rule-name">High Value Alert</span>
+          <label class="toggle">
+            <input type="checkbox" checked id="toggle-amount">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Flag if amount &gt; ₹<input type="number" value="100000" class="inline-input" id="amt-threshold" min="1"></p>
+        <div class="rule-status on">Active</div>
+      </div>
+      <div class="rule-card card" id="rule-geo">
+        <div class="rule-top">
+          <span class="rule-name">Geo Anomaly</span>
+          <label class="toggle">
+            <input type="checkbox" checked id="toggle-geo">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Flag transactions from high-risk countries (Russia, Nigeria, North Korea)</p>
+        <div class="rule-status on">Active</div>
+      </div>
+      <div class="rule-card card" id="rule-device">
+        <div class="rule-top">
+          <span class="rule-name">Device Fingerprint</span>
+          <label class="toggle">
+            <input type="checkbox" checked id="toggle-device">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Flag VPN / TOR usage on first-time high-value transactions</p>
+        <div class="rule-status on">Active</div>
+      </div>
+      <div class="rule-card card" id="rule-night">
+        <div class="rule-top">
+          <span class="rule-name">Night Transaction</span>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-night">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Flag large transactions between 12AM – 5AM</p>
+        <div class="rule-status off">Inactive</div>
+      </div>
+      <div class="rule-card card" id="rule-merchant">
+        <div class="rule-top">
+          <span class="rule-name">Merchant Blacklist</span>
+          <label class="toggle">
+            <input type="checkbox" checked id="toggle-merchant">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="rule-desc">Block all transactions to flagged merchant categories (Gambling, Crypto)</p>
+        <div class="rule-status on">Active</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS PAGE -->
+  <div class="page" id="page-users" style="padding:24px">
+    <div class="page-header">
+      <h1>User Management</h1>
+      <p class="page-sub">Admin-only — manage analyst accounts</p>
+    </div>
+    <div class="card" style="padding:20px;margin-bottom:16px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input type="text" id="new-username" placeholder="Username" style="flex:1"/>
+        <input type="password" id="new-password" placeholder="Password" style="flex:1"/>
+        <select id="new-role"><option value="analyst">Analyst</option><option value="admin">Admin</option></select>
+        <button class="btn-primary" onclick="createUser()">+ Add User</button>
+      </div>
+    </div>
+    <div class="table-wrap card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Action</th></tr></thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

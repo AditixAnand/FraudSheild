@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield - Real-Time Fraud Detection Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Syne', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0c10;
+            color: #e8eaf2;
+            overflow: hidden;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            background: linear-gradient(135deg, #0a0c10 0%, #111520 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(79,142,247,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(240,82,82,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #4f8ef7 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #4f8ef7;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #a78bfa;
+        }
+
+        p, li {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #e8eaf2;
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #6b7594;
+            margin-top: 20px;
+        }
+
+        ul {
+            text-align: left;
+            display: inline-block;
+            margin: 20px auto;
+        }
+
+        li {
+            margin: 15px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        li::before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #4f8ef7;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(17, 21, 32, 0.8);
+            border: 1px solid #1e2535;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(79,142,247,0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #4f8ef7;
+        }
+
+        .card h4 {
+            font-size: 1.3em;
+            color: #4f8ef7;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            font-size: 1em;
+            margin: 0;
+            color: #b5bcc7;
+        }
+
+        .stat-box {
+            display: inline-block;
+            background: rgba(79,142,247,0.1);
+            border: 2px solid #4f8ef7;
+            border-radius: 10px;
+            padding: 20px 40px;
+            margin: 10px;
+            font-size: 1.1em;
+        }
+
+        .feature-box {
+            background: rgba(17, 21, 32, 0.8);
+            border-left: 4px solid #4f8ef7;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .feature-box h4 {
+            color: #4f8ef7;
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 60px;
+            font-size: 0.9em;
+            color: #6b7594;
+        }
+
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            background: #4f8ef7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background: #a78bfa;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .slide-number {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 1em;
+            color: #6b7594;
+        }
+
+        .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .column {
+            flex: 1;
+            text-align: left;
+        }
+
+        .code-block {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #1e2535;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation">
+        <!-- Slide 1: Title Slide -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="icon">⬡</div>
+                <h1>FraudShield</h1>
+                <p class="subtitle">Real-Time Fraud Intelligence Platform</p>
+                <p style="font-size: 1.1em; margin-top: 40px; color: #6b7594;">Advanced Transaction Monitoring & Risk Detection</p>
+                <p style="margin-top: 60px; color: #4f8ef7;">April 2026</p>
+            </div>
+            <div class="footer">
+                <span>Comprehensive Fraud Detection System</span>
+                <span id="slide-counter">1 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 2: Problem Statement -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Problem Statement</h2>
+                <ul style="margin-top: 50px;">
+                    <li>Financial fraud costs organizations billions annually</li>
+                    <li>Traditional fraud detection is reactive & slow</li>
+                    <li>Manual review creates bottlenecks</li>
+                    <li>Need for real-time, intelligent detection</li>
+                    <li>Complex patterns require multi-factor analysis</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <span>Problem Analysis</span>
+                <span id="slide-counter">2 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 3: Solution Overview -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Solution Overview</h2>
+                <p style="margin-bottom: 40px;">FraudShield is a comprehensive, real-time fraud detection platform that:</p>
+                <div class="grid-3">
+                    <div class="card">
+                        <div class="icon">⚡</div>
+                        <h4>Real-Time</h4>
+                        <p>Instant transaction analysis via WebSocket</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon">🧠</div>
+                        <h4>Intelligent</h4>
+                        <p>Multi-factor scoring algorithm</p>
+                    </div>
+                    <div class="card">
+                        <div class="icon">📊</div>
+                        <h4>Observable</h4>
+                        <p>Rich dashboards & visualizations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Core Capabilities</span>
+                <span id="slide-counter">3 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 4: Architecture -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Technology Stack</h2>
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color: #4f8ef7; margin-bottom: 20px;">Frontend</h4>
+                        <ul style="text-align: center;">
+                            <li>HTML/CSS/JavaScript</li>
+                            <li>Chart.js for visualizations</li>
+                            <li>Canvas for network graphs</li>
+                            <li>Dark/Light theme support</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #4f8ef7; margin-bottom: 20px;">Backend</h4>
+                        <ul style="text-align: center;">
+                            <li>Node.js + Express</li>
+                            <li>SQLite database</li>
+                            <li>WebSocket (ws)</li>
+                            <li>JWT authentication</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Technical Stack</span>
+                <span id="slide-counter">4 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 5: Key Features - Part 1 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Core Features</h2>
+                <div class="feature-box">
+                    <h4>1. Dashboard</h4>
+                    <p>Real-time KPI cards, transaction volume charts, risk distribution donut, live transaction feed</p>
+                </div>
+                <div class="feature-box">
+                    <h4>2. Transaction Simulation</h4>
+                    <p>Test fraud detection with custom parameters: amount, channel, merchant, country, device</p>
+                </div>
+                <div class="feature-box">
+                    <h4>3. Transaction Log</h4>
+                    <p>Complete audit trail with search, filtering, CSV/PDF export capabilities</p>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Features Overview (1/2)</span>
+                <span id="slide-counter">5 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 6: Key Features - Part 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Additional Features</h2>
+                <div class="feature-box">
+                    <h4>4. Geographic Heatmap</h4>
+                    <p>Visualize fraud concentration by region with live risk statistics per city</p>
+                </div>
+                <div class="feature-box">
+                    <h4>5. Network Graph</h4>
+                    <p>Interactive visualization of account linkages and suspicious clusters</p>
+                </div>
+                <div class="feature-box">
+                    <h4>6. Rule Engine</h4>
+                    <p>6 configurable rules: velocity, high-value, geo-anomaly, device fingerprint, night transactions, merchant blacklist</p>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Features Overview (2/2)</span>
+                <span id="slide-counter">6 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 7: Fraud Scoring Algorithm -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Intelligent Scoring Algorithm</h2>
+                <p style="margin-bottom: 30px;">Multi-factor risk assessment:</p>
+                <ul>
+                    <li><strong>Amount Risk:</strong> High transactions (₹100k+) add 30 points</li>
+                    <li><strong>Geographic Risk:</strong> High-risk countries (Russia, Nigeria) add 35 points</li>
+                    <li><strong>Merchant Risk:</strong> Crypto/Gambling merchants add 25 points</li>
+                    <li><strong>Device Risk:</strong> VPN (+15) or TOR (+40) detected</li>
+                    <li><strong>Behavioral Risk:</strong> Random baseline (0-20) + velocity checks</li>
+                    <li><strong>Final Score:</strong> 0-99 → Fraud (≥70) | Review (40-69) | Clear (<40)</li>
+                </ul>
+            </div>
+            <div class="footer">
+                <span>Risk Calculation</span>
+                <span id="slide-counter">7 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 8: Alert Management -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Alert Management System</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>🔔 Alert Bell</h4>
+                        <p>Real-time notification count in top navigation</p>
+                    </div>
+                    <div class="card">
+                        <h4>📋 Alert Dropdown</h4>
+                        <p>Recent alerts with transaction details</p>
+                    </div>
+                    <div class="card">
+                        <h4>⚠️ Alert Banner</h4>
+                        <p>Auto-dismiss banner with fraud details</p>
+                    </div>
+                    <div class="card">
+                        <h4>📧 Email Alerts</h4>
+                        <p>Nodemailer integration for email notifications</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Notification System</span>
+                <span id="slide-counter">8 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 9: Authentication & Security -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Security & Authentication</h2>
+                <div class="grid-2">
+                    <div class="feature-box">
+                        <h4>🔐 JWT Authentication</h4>
+                        <p>Stateless token-based auth for secure API access</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🔑 Password Security</h4>
+                        <p>Bcrypt hashing for secure password storage</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>👥 Role-Based Access</h4>
+                        <p>Admin vs Analyst permissions for feature access</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🗄️ Database</h4>
+                        <p>SQLite with encrypted sensitive data</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Security Features</span>
+                <span id="slide-counter">9 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 10: Real-Time Data Flow -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Real-Time Data Flow</h2>
+                <div class="code-block">
+User Browser → JWT Login → WebSocket Connection ↓
+    Transaction Generated on Server ↓
+    Fraud Scoring Applied ↓
+    WebSocket Broadcast to All Clients ↓
+    Frontend Updates (Charts, KPIs, Feed) ↓
+    Data Persisted to SQLite ↓
+    User Interacts (Simulate, Filter, Export)
+                </div>
+                <p style="margin-top: 30px;">Result: <strong>Sub-second latency for real-time fraud detection</strong></p>
+            </div>
+            <div class="footer">
+                <span>Architecture Flow</span>
+                <span id="slide-counter">10 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 11: Dashboard Metrics -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Dashboard KPIs</h2>
+                <p style="margin-bottom: 40px;">Real-time performance metrics displayed as KPI cards:</p>
+                <div class="grid-2">
+                    <div class="stat-box">
+                        <div class="icon" style="color: #f05252;">📊</div>
+                        <strong>Fraud Detected Today</strong>
+                    </div>
+                    <div class="stat-box">
+                        <div class="icon" style="color: #22d3a0;">✓</div>
+                        <strong>Transactions Cleared</strong>
+                    </div>
+                    <div class="stat-box">
+                        <div class="icon" style="color: #f5a623;">⏳</div>
+                        <strong>Under Review</strong>
+                    </div>
+                    <div class="stat-box">
+                        <div class="icon" style="color: #4f8ef7;">🎯</div>
+                        <strong>Accuracy Score (ML)</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Dashboard Overview</span>
+                <span id="slide-counter">11 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 12: User Management -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>User Management (Admin Panel)</h2>
+                <p style="margin-bottom: 40px;">Control analyst accounts and access levels:</p>
+                <div class="grid-2">
+                    <div class="card">
+                        <h4>➕ Create Users</h4>
+                        <p>Add new analyst or admin accounts with credentials</p>
+                    </div>
+                    <div class="card">
+                        <h4>❌ Delete Users</h4>
+                        <p>Remove accounts and revoke access</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔐 Role Assignment</h4>
+                        <p>Assign Analyst or Admin roles</p>
+                    </div>
+                    <div class="card">
+                        <h4>📝 Audit Trail</h4>
+                        <p>Track user activities and access logs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Admin Controls</span>
+                <span id="slide-counter">12 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 13: Testing Features -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Testing & Debug Features</h2>
+                <div class="grid-2">
+                    <div class="feature-box">
+                        <h4>🧪 Test Alert Button</h4>
+                        <p>Manually trigger a fraud alert to test system response and notification flows</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>🔍 Debug Console</h4>
+                        <p>View system diagnostics: state counts, DOM elements, alert arrays, live data</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>📈 Simulation Mode</h4>
+                        <p>Configure custom transaction parameters and test scoring algorithm</p>
+                    </div>
+                    <div class="feature-box">
+                        <h4>⚙️ Live Simulator</h4>
+                        <p>Auto-generate transactions every 3-5 seconds for realistic demo</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Testing & Debugging</span>
+                <span id="slide-counter">13 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 14: Benefits & Use Cases -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Benefits & Use Cases</h2>
+                <div class="grid-2">
+                    <div>
+                        <h4 style="color: #4f8ef7; margin-bottom: 20px;">For Organizations</h4>
+                        <ul style="text-align: left;">
+                            <li>Reduce fraud losses by 85%+</li>
+                            <li>Faster detection & response</li>
+                            <li>Lower operational costs</li>
+                            <li>Regulatory compliance</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #4f8ef7; margin-bottom: 20px;">Use Cases</h4>
+                        <ul style="text-align: left;">
+                            <li>Banking & Fintech</li>
+                            <li>Payment processors</li>
+                            <li>E-commerce fraud prevention</li>
+                            <li>Insurance claims fraud</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer">
+                <span>Business Value</span>
+                <span id="slide-counter">14 / 15</span>
+            </div>
+        </div>
+
+        <!-- Slide 15: Conclusion & Next Steps -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2>Conclusion</h2>
+                <p style="margin-bottom: 40px;">FraudShield delivers:</p>
+                <ul style="margin-bottom: 40px;">
+                    <li>✅ Real-time fraud detection with sub-second latency</li>
+                    <li>✅ Intelligent multi-factor scoring algorithm</li>
+                    <li>✅ Comprehensive dashboards & visualizations</li>
+                    <li>✅ Secure authentication & role-based access</li>
+                    <li>✅ Scalable architecture for production deployment</li>
+                </ul>
+                <p style="font-size: 1.3em; color: #4f8ef7; margin-top: 40px;"><strong>Ready for immediate deployment! 🚀</strong></p>
+            </div>
+            <div class="footer">
+                <span>Summary</span>
+                <span id="slide-counter">15 / 15</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button onclick="previousSlide()">← Previous</button>
+        <button onclick="nextSlide()">Next →</button>
+    </div>
+
+    <div class="slide-number" id="slide-number">1 / 15</div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById('slide-number').textContent = (currentSlide + 1) + ' / ' + totalSlides;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') previousSlide();
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
