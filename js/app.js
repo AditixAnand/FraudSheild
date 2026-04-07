@@ -21,11 +21,6 @@ window.addEventListener('DOMContentLoaded', () => {
       topRight.prepend(userEl);
     }
   }
-
-  const alertBell = document.getElementById('alertBell');
-  if (alertBell) {
-    alertBell.addEventListener('click', toggleAlertDropdown);
-  }
 });
 
 // ── WebSocket ───────────────────────────────────────────
@@ -265,15 +260,10 @@ function addAlert(txn) {
 function toggleAlertDropdown() {
   console.log('🔔 Bell clicked - toggling dropdown');
   
-  const alertBell = document.getElementById('alertBell');
   const dropdown = document.getElementById('alertDropdown');
   if (!dropdown) {
     console.error('❌ alertDropdown element not found!');
     return;
-  }
-  if (alertBell) {
-    const expanded = dropdown.classList.contains('show');
-    alertBell.setAttribute('aria-expanded', expanded ? 'false' : 'true');
   }
   
   const isVisible = dropdown.classList.contains('show');
