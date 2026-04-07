@@ -60,18 +60,18 @@
       </div>
       <button onclick="testAlert()" style="background:var(--danger);color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-right:8px">Test Alert</button>
       <button onclick="diagnosticCheck()" style="background:var(--accent);color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-right:8px">Debug</button>
-      <div class="alert-bell" id="alertBell" title="Alerts" onclick="toggleAlertDropdown()">
+      <button class="alert-bell" id="alertBell" title="Alerts" type="button" aria-haspopup="true" aria-expanded="false">
         🔔 <span class="bell-count" id="bellCount">0</span>
         <div class="alert-dropdown" id="alertDropdown">
           <div class="alert-dropdown-header">
             <span>Recent Alerts</span>
-            <button onclick="clearAllAlerts(event)" class="clear-alerts-btn">Clear All</button>
+            <button onclick="clearAllAlerts(event)" class="clear-alerts-btn" type="button">Clear All</button>
           </div>
           <div class="alert-dropdown-body" id="alertDropdownBody">
             <div class="no-alerts">No alerts yet</div>
           </div>
         </div>
-      </div>
+      </button>
       <button class="theme-toggle" id="themeToggle" title="Toggle theme">
         <span id="themeIcon">☀</span>
       </button>
