@@ -973,24 +973,84 @@ function diagnosticCheck() {
   console.log('- fraudCount:', state.fraudCount);
   console.log('- alertCount:', state.alertCount);
   console.log('- alerts array length:', state.alerts.length);
-  
+
   console.log('🏠 DOM Elements:');
   const bellCount = document.getElementById('bellCount');
   const alertBell = document.getElementById('alertBell');
   const alertDropdown = document.getElementById('alertDropdown');
   const alertDropdownBody = document.getElementById('alertDropdownBody');
-  
+
   console.log('- bellCount:', bellCount, bellCount?.textContent);
   console.log('- alertBell:', alertBell);
   console.log('- alertDropdown:', alertDropdown);
   console.log('- alertDropdownBody:', alertDropdownBody);
-  
+
   if (bellCount) {
     console.log('🔔 Bell HTML:', bellCount.parentElement.outerHTML);
   }
-  
+
   console.log('📝 Recent alerts:', state.alerts.slice(0, 3));
   console.log('🔍 === END DIAGNOSTIC ===');
+
+  // Display diagnostic info in modal
+  try {
+    const modalContent = document.getElementById('modalContent');
+    const modalOverlay = document.getElementById('modalOverlay');
+
+    if (!modalContent) {
+      console.error('❌ modalContent element not found!');
+      alert('Debug modal not available. Check console for details.');
+      return;
+    }
+
+    if (!modalOverlay) {
+      console.error('❌ modalOverlay element not found!');
+      alert('Debug modal overlay not available. Check console for details.');
+      return;
+    }
+
+    const diagnosticHTML = `
+      <h2 style="font-size:18px;font-weight:800;margin-bottom:20px">🔍 System Diagnostic</h2>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Fraud Count</span>
+        <span class="modal-txn-value">${state.fraudCount}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Alert Count</span>
+        <span class="modal-txn-value">${state.alertCount}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Alerts Array Length</span>
+        <span class="modal-txn-value">${state.alerts.length}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Bell Count Element</span>
+        <span class="modal-txn-value">${bellCount ? 'Found (' + bellCount.textContent + ')' : 'Not Found'}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Alert Bell Element</span>
+        <span class="modal-txn-value">${alertBell ? 'Found' : 'Not Found'}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Alert Dropdown Element</span>
+        <span class="modal-txn-value">${alertDropdown ? 'Found' : 'Not Found'}</span>
+      </div>
+      <div class="modal-txn-row">
+        <span class="modal-txn-label">Alert Dropdown Body Element</span>
+        <span class="modal-txn-value">${alertDropdownBody ? 'Found' : 'Not Found'}</span>
+      </div>
+      <div style="margin-top:16px;display:flex;gap:10px">
+        <button class="btn-secondary" style="flex:1" onclick="closeModal()">Close</button>
+      </div>
+    `;
+
+    modalContent.innerHTML = diagnosticHTML;
+    modalOverlay.style.display = 'flex';
+    console.log('✅ Modal opened successfully');
+  } catch (error) {
+    console.error('❌ Error opening diagnostic modal:', error);
+    alert('Error opening debug modal. Check console for details.');
+  }
 }
 function testAlert() {
   console.log('📝 Manual test alert triggered');
